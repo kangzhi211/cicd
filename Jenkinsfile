@@ -32,12 +32,5 @@ pipeline {
         }
     }
 
-    post {
-        failure {
-            mail to: 'team@example.com', subject: 'Pipeline Failed', body: '请检查构建日志'
-        }
-        success {
-            echo 'Pipeline 执行成功！'
-        }
-    }
+    
 }
