@@ -1,40 +1,43 @@
 pipeline {
-    agent any
+    agent any  // 在任何可用节点上运行
 
     stages {
-        stage('Hello') {
+        stage('Checkout') {  // 拉取代码
             steps {
-                echo 'Hello World'
+                git branch: 'main', url: 'https://github.com/your-repo/example.git'
+            }
+        }
+
+        stage('Build') {  // 构建项目（示例为Maven）
+            steps {
+                sh 'mvn clean package'  // 如果是Node.js可替换为 `npm install`
+            }
+        }
+
+        stage('Test') {  // 运行测试
+            steps {
+                sh 'mvn test'  // 或 `npm test` / `pytest` 等
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'  // 收集测试报告
+                }
+            }
+        }
+
+        stage('Deploy') {  // 部署（示例为复制文件）
+            steps {
+                sh 'cp target/*.war /opt/tomcat/webapps/'  // 根据实际需求修改
             }
         }
     }
-    stages {
-        stage('天') {
-            steps {
-                echo 'Hello World'
-            }
+
+    post {
+        failure {
+            mail to: 'team@example.com', subject: 'Pipeline Failed', body: '请检查构建日志'
         }
-    }
-    stages {
-        stage('下') {
-            steps {
-                echo 'Hello World'
-            }
-        }
-    }
-    stages {
-        stage('无') {
-            steps {
-                echo 'Hello World'
-            }
-        }
-    }
-    stages {
-        stage('贼') {
-            steps {
-                echo 'Hello World'
-            }
+        success {
+            echo 'Pipeline 执行成功！'
         }
     }
 }
-
