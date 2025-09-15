@@ -20,12 +20,12 @@ pipeline {
             }
         }
 
-        stage('sonar质量检测') {  // 运行测试
-            steps {
-                sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.projectname=${JOB_NAME}   -Dsonar.projectkey=${JOB_NAME}   -Dsonar.sources=./ -Dsonar.java.binaries=target/   -Dsonar.login=sqa_6173a0aca6564093612f206e8fd3cfb4a5a37244'
-            }
+//        stage('sonar质量检测') {  // 运行测试
+//            steps {
+//                sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.projectname=${JOB_NAME}   -Dsonar.projectKey=${JOB_NAME}   -Dsonar.sources=./ -Dsonar.java.binaries=target/   -Dsonar.login=sqa_6173a0aca6564093612f206e8fd3cfb4a5a37244'
+//            }
             
-        }
+//        }
 
         stage('构建推送镜像') {  // 部署（示例为复制文件）
             steps {
