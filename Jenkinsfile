@@ -1,10 +1,11 @@
 pipeline {
     agent any  // 在任何可用节点上运行
-
-    harboruser = 'admin'
-    harborpasswd = 'cao123456'
-    harboradrr = '10.0.0.6'
-    harborrepo = 'pipe'
+    environment{
+        harboruser = 'admin'
+        harborpasswd = 'cao123456'
+        harboradrr = '10.0.0.6'
+        harborrepo = 'pipe'
+    }
     
     stages {
         stage('拉取代码') {  
@@ -38,7 +39,7 @@ docker push ${harboradrr}/${JOB_NAME}/demo:${tag}'''
 
         stage('目标服务器运行') {  // 运行测试
             steps {
-                sshPublisher(publishers: [sshPublisherDesc(configName: 'slb-6', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "/test02/pull.sh  ${harboradrr}  ${harborrepo}    demo  ${tag}    ${outport}  ${inport}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'slb-6', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "/test02/pull.sh  $harboradrr  $harborrepo    demo  $tag    $outport  $inport", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
             
         }
