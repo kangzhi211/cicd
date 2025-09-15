@@ -1,34 +1,46 @@
 pipeline {
     agent any  // 在任何可用节点上运行
 
+    harboruser = 'admin'
+    harborpasswd = 'cao123456'
+    harboradrr = '10.0.0.6'
+    harborrepo = 'pipe'
+    
     stages {
-        stage('Checkout') {  // 拉取代码
+        stage('拉取代码') {  
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo/example.git'
+                git branch: 'main', url: 'https://github.com/kangzhi211/cicd.git'
             }
         }
 
-        stage('Build') {  // 构建项目（示例为Maven）
+        stage('构建项目（示例为Maven）') {  
             steps {
-                sh 'mvn clean package'  // 如果是Node.js可替换为 `npm install`
+                sh '/var/jenkins_home/maven/bin/mvn clean   package  -Dskip Tests'
             }
         }
 
-        stage('Test') {  // 运行测试
+        stage('sonar质量检测') {  // 运行测试
             steps {
-                sh 'mvn test'  // 或 `npm test` / `pytest` 等
+                sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.projectname=${JOB_NAME}   -Dsonar.projectkey=${JOB_NAME}   -Dsonar.sources=./ -Dsonar.java.binaries=target/   -Dsonar.login=sqa_6173a0aca6564093612f206e8fd3cfb4a5a37244'
             }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'  // 收集测试报告
-                }
+            
+        }
+
+        stage('构建推送镜像') {  // 部署（示例为复制文件）
+            steps {
+                sh '''cp target/*.jar   ./docker/
+cd /var/jenkins_home/workspace/${JOB_NAME}/docker
+docker build -t ${harboradrr}/${JOB_NAME}/demo:${tag}  .
+docker login -u ${harboruser}  -p ${harborpasswd}  ${harboradrr}
+docker push ${harboradrr}/${JOB_NAME}/demo:${tag}'''
             }
         }
 
-        stage('Deploy') {  // 部署（示例为复制文件）
+        stage('目标服务器运行') {  // 运行测试
             steps {
-                sh 'cp target/*.war /opt/tomcat/webapps/'  // 根据实际需求修改
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'slb-6', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "/test02/pull.sh  ${harboradrr}  ${harborrepo}    demo  ${tag}    ${outport}  ${inport}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
+            
         }
     }
 
